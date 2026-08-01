@@ -117,6 +117,25 @@ namespace DJMaxEditor.Tests
                     "preview frame did not consume the shared model tick");
             });
 
+            Test("GameplayPreview_RenderableFrameOnlyClonesTheVisiblePlaybackWindow", () =>
+            {
+                PlayerData model = PreviewModel(ChartFormat.PtffDecrypted, 4);
+                EventData current = AddPreviewNote(model, 0, 0, 0, 6);
+                EventData next = AddPreviewNote(model, 1, 192, 0, 6);
+                AddPreviewNote(model, 2, 384, 0, 6);
+                GameplayPreviewProjection chart =
+                    GameplayPreviewProjector.Project(model, GameplayPreviewProfile.Technika);
+
+                GameplayPreviewFrame frame = chart.CreateRenderableFrame(24);
+
+                AssertTrue(frame.Notes.Any(note => note.Source == current),
+                    "current Technika scan was omitted from the renderable frame");
+                AssertTrue(frame.Notes.Any(note => note.Source == next),
+                    "next Technika scan was omitted from the renderable frame");
+                AssertTrue(frame.Notes.Count < chart.Notes.Count,
+                    "renderable frame cloned notes outside the visible playback window");
+            });
+
             Test("GameplayPreview_GenericModeDoesNotApplyTechnikaSpecialTracks", () =>
             {
                 PlayerData model = PreviewModel(ChartFormat.TrailerRespectV, 8);

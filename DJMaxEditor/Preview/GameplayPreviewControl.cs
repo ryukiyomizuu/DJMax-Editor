@@ -106,7 +106,7 @@ namespace DJMaxEditor.Preview
             }
             else
             {
-                _frame = _projection.CreateFrame(_document.Model.CurrentTick);
+                _frame = _projection.CreateRenderableFrame(_document.Model.CurrentTick);
             }
             Invalidate();
         }

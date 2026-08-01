@@ -339,7 +339,7 @@ namespace DJMaxEditor.Tests
                     BindingFlags.Instance | BindingFlags.Public |
                     BindingFlags.NonPublic,
                     null,
-                    new object[] { 16L },
+                    new object[] { 33L },
                     null);
                 MethodInfo shouldRender = schedulerType.GetMethod(
                     "ShouldRenderAt",
@@ -351,10 +351,10 @@ namespace DJMaxEditor.Tests
                     "first playback update was incorrectly delayed");
                 AssertTrue(!(bool)shouldRender.Invoke(scheduler, new object[] { 1004L }),
                     "4ms playback update was not coalesced");
-                AssertTrue(!(bool)shouldRender.Invoke(scheduler, new object[] { 1015L }),
-                    "15ms playback update was not coalesced");
-                AssertTrue((bool)shouldRender.Invoke(scheduler, new object[] { 1016L }),
-                    "16ms playback frame was incorrectly delayed");
+                AssertTrue(!(bool)shouldRender.Invoke(scheduler, new object[] { 1032L }),
+                    "32ms playback update was not coalesced");
+                AssertTrue((bool)shouldRender.Invoke(scheduler, new object[] { 1033L }),
+                    "33ms playback frame was incorrectly delayed");
             });
 
             Test("TimelineV2_SonOfSunPlaybackFrameFitsSmooth30HzBudget", () =>

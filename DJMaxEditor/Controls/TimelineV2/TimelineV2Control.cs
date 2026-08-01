@@ -26,8 +26,11 @@ namespace DJMaxEditor.Controls.TimelineV2
 
         private readonly TimelineRenderer _renderer = new TimelineRenderer();
         private readonly RawTrackProjection _projection = new RawTrackProjection();
+        // Timeline V2's static layer is comparatively expensive to rebuild while
+        // following playback. Coalesce the UI-side redraws to the 30 Hz budget
+        // instead of competing with audio for a 60 Hz WinForms paint loop.
         private readonly PlaybackFrameScheduler _playbackFrames =
-            new PlaybackFrameScheduler(16);
+            new PlaybackFrameScheduler(33);
         private readonly Stopwatch _playbackClock = Stopwatch.StartNew();
         private TimelineProjectionResult _projectionResult;
         private TimelineEventIndex _index;

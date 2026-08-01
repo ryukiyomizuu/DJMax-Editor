@@ -544,6 +544,7 @@ namespace DJMaxEditor
 
             m_preview.Show(dockPanel);
             m_preview.Activate();
+            m_preview.RefreshPlaybackImmediately();
             SetStudioStatus("GAMEPLAY PREVIEW  •  VIEW ONLY");
         }
 

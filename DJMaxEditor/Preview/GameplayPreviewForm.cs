@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using System.Drawing;
 using System.Windows.Forms;
 using DJMaxEditor.Editor;
@@ -17,6 +18,9 @@ namespace DJMaxEditor.Preview
         private readonly Button _generic;
         private readonly Button _technika;
         private readonly TrackBar _zoom;
+        private const long PlaybackFrameIntervalMilliseconds = 33;
+        private readonly Stopwatch _playbackClock = Stopwatch.StartNew();
+        private long _lastPlaybackFrameMilliseconds = -PlaybackFrameIntervalMilliseconds;
 
         public GameplayPreviewForm()
         {
@@ -134,6 +138,31 @@ namespace DJMaxEditor.Preview
 
         public void RefreshPlayback()
         {
+            if (!IsPlaybackVisible())
+            {
+                return;
+            }
+
+            long elapsed = _playbackClock.ElapsedMilliseconds;
+            if (elapsed - _lastPlaybackFrameMilliseconds <
+                PlaybackFrameIntervalMilliseconds)
+            {
+                return;
+            }
+
+            _lastPlaybackFrameMilliseconds = elapsed;
+            _preview.RefreshPlayback();
+            UpdateStatus();
+        }
+
+        public void RefreshPlaybackImmediately()
+        {
+            if (!IsPlaybackVisible())
+            {
+                return;
+            }
+
+            _lastPlaybackFrameMilliseconds = _playbackClock.ElapsedMilliseconds;
             _preview.RefreshPlayback();
             UpdateStatus();
         }
@@ -173,6 +202,11 @@ namespace DJMaxEditor.Preview
             _status.ForeColor = _preview.DiagnosticCount == 0
                 ? StudioDesignSystem.Muted
                 : StudioDesignSystem.SignalAmber;
+        }
+
+        private bool IsPlaybackVisible()
+        {
+            return !IsDisposed && Visible && _preview.Visible;
         }
 
         private static Button BuildProfileButton(string text, int left)

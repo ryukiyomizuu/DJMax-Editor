@@ -177,6 +177,20 @@ namespace DJMaxEditor.Preview
 
         public GameplayPreviewFrame CreateFrame(int currentTick)
         {
+            return CreateFrame(currentTick, false);
+        }
+
+        /// <summary>
+        /// Creates the small playback window used by the renderer. Unlike the
+        /// diagnostic/full frame, it does not clone notes that cannot be drawn.
+        /// </summary>
+        public GameplayPreviewFrame CreateRenderableFrame(int currentTick)
+        {
+            return CreateFrame(currentTick, true);
+        }
+
+        private GameplayPreviewFrame CreateFrame(int currentTick, bool renderableOnly)
+        {
             int ticks = Math.Max(1, (int)_ticksPerMeasure);
             double currentScan = Profile == GameplayPreviewProfile.Technika
                 ? (4.0 * currentTick) / (ticks * Math.Max(1, _beatsPerScan))
@@ -187,6 +201,12 @@ namespace DJMaxEditor.Preview
 
             foreach (ProjectedGameplayNote topology in Notes)
             {
+                if (renderableOnly && !IsInRenderableWindow(
+                    topology, currentTick, currentIntScan, ticks))
+                {
+                    continue;
+                }
+
                 ProjectedGameplayNote note = topology.Copy();
                 if (Profile == GameplayPreviewProfile.Technika)
                 {
@@ -232,6 +252,25 @@ namespace DJMaxEditor.Preview
             }
 
             return new GameplayPreviewFrame(currentTick, currentScan, notes.AsReadOnly());
+        }
+
+        private bool IsInRenderableWindow(
+            ProjectedGameplayNote note,
+            int currentTick,
+            int currentIntScan,
+            int ticks)
+        {
+            if (Profile == GameplayPreviewProfile.Technika)
+            {
+                // The Technika renderer draws only this scan and the next scan;
+                // older/further scans are Resolved or Inactive before painting.
+                int scanDistance = note.ScanIndex - currentIntScan;
+                return scanDistance >= 0 && scanDistance <= 1;
+            }
+
+            // Generic rendering maps two measures around the playhead into the
+            // viewport, so notes outside that range cannot contribute pixels.
+            return Math.Abs(note.Source.Tick - currentTick) <= ticks * 2;
         }
     }
 
